@@ -2,10 +2,11 @@ package org.firstinspires.ftc.teamcode;
 
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@TeleOp(name="Main2024",group="Linear OpMode")
+@TeleOp(name="Main2024",group = "Linear OpMode")
 public class Main2024 extends LinearOpMode {
     DcMotor LF,LR,RF,RR;
 
@@ -16,7 +17,7 @@ public class Main2024 extends LinearOpMode {
         RF = hardwareMap.get(DcMotor.class, "RF");
         RR = hardwareMap.get(DcMotor.class, "RR");
 
-        telemetry.addData("Init:", "Succes");
+        telemetry.addData("Init:", "Success");
         telemetry.update();
 
         waitForStart();//Wait for the start of the op mode
@@ -51,7 +52,6 @@ public class Main2024 extends LinearOpMode {
                 RF.setPower(0);
                 RR.setPower(0);
             }
-            telemetry.addData("Robot:","Activating!");
             telemetry.update();
         }
     }
