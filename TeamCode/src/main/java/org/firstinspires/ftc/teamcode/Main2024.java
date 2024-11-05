@@ -29,10 +29,10 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import static org.firstinspires.ftc.teamcode.DriveUtilities.*;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Rotation;
@@ -42,8 +42,8 @@ import java.util.Arrays;
 @TeleOp(name="Main2024")
 public class Main2024 extends OpMode {
     // Declare our motor variables
-    DcMotor LF, LR, RF, RR, Hand, Elbow, Shoulder;
-    static double TICKS_TO_IMPERIAL_THING = 118.83569;
+    DcMotor[] driveTrain;
+    DcMotor Hand, Elbow, Shoulder;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -51,10 +51,7 @@ public class Main2024 extends OpMode {
     @Override
     public void init() {
         // Initialize motors
-        LF     = hardwareMap.get(DcMotor.class, "LF");
-        LR     = hardwareMap.get(DcMotor.class, "LR");
-        RF     = hardwareMap.get(DcMotor.class, "RF");
-        RR     = hardwareMap.get(DcMotor.class, "RR");
+        driveTrain = initializeDriveTrain(hardwareMap);
 
         Hand = hardwareMap.get(DcMotor.class, "Intake");
         Elbow  = hardwareMap.get(DcMotor.class, "Elbow");
@@ -65,20 +62,6 @@ public class Main2024 extends OpMode {
         tetrixConfig.setMaxRPM(165);
         tetrixConfig.setTicksPerRev(1440);
         tetrixConfig.setOrientation(Rotation.CW);
-
-        MotorConfigurationType revConfig = new MotorConfigurationType();
-        revConfig.setGearing(40);
-        revConfig.setMaxRPM(150);
-        revConfig.setTicksPerRev(1120);
-        revConfig.setOrientation(Rotation.CCW);
-
-        LF.setMotorType(revConfig);
-        LR.setMotorType(revConfig);
-        RF.setMotorType(revConfig);
-        RR.setMotorType(revConfig);
-
-        RF.setDirection(DcMotorSimple.Direction.REVERSE);
-        RR.setDirection(DcMotorSimple.Direction.REVERSE);
 
         Elbow.setMotorType(tetrixConfig);
         Shoulder.setMotorType(tetrixConfig);
@@ -116,31 +99,21 @@ public class Main2024 extends OpMode {
         float ry2 = -gamepad2.right_stick_y;
 
         // Drive control
-        if (Math.abs(ly1) > .1) {
+        if (Math.abs(ly1) > .1)
             // Forward and backward movement
-            LF.setPower(ly1);
-            LR.setPower(ly1);
-            RF.setPower(ly1);
-            RR.setPower(ly1);
-        } else if (Math.abs(rx1) > .1) {
+            drive(driveTrain, ly1);
+
+        else if (Math.abs(rx1) > .1)
             // Rotation
-            LF.setPower(rx1);
-            LR.setPower(rx1);
-            RF.setPower(-rx1);
-            RR.setPower(-rx1);
-        } else if (Math.abs(lx1) > .1) {
+            rotate(driveTrain, rx1);
+
+        else if (Math.abs(lx1) > .1)
             // Sideways movement
-            LF.setPower(-lx1);
-            LR.setPower(lx1);
-            RF.setPower(lx1);
-            RR.setPower(-lx1);
-        } else {
+            driveSideways(driveTrain, lx1);
+
+        else
             // Stop motors if no input
-            LF.setPower(0);
-            LR.setPower(0);
-            RF.setPower(0);
-            RR.setPower(0);
-        }
+            stopDrive(driveTrain);
 
         if (Math.abs(ly2) > .1)
             Shoulder.setPower(ly2);
@@ -161,10 +134,10 @@ public class Main2024 extends OpMode {
 
         // Update dashboard values
         telemetry.addData("Encoders", Arrays.toString(new int[]{
-                LF.getCurrentPosition(),
-                LR.getCurrentPosition(),
-                RF.getCurrentPosition(),
-                RR.getCurrentPosition()
+                driveTrain[FRONT_LEFT].getCurrentPosition(),
+                driveTrain[BACK_LEFT].getCurrentPosition(),
+                driveTrain[FRONT_RIGHT].getCurrentPosition(),
+                driveTrain[BACK_RIGHT].getCurrentPosition()
         }));
         telemetry.addData("Controller One", Arrays.toString(new float[]{
                 gamepad1.left_stick_x,
@@ -187,10 +160,7 @@ public class Main2024 extends OpMode {
     @Override
     public void stop() {
         // Stop motors for safety
-        LF.setPower(0);
-        LR.setPower(0);
-        RF.setPower(0);
-        RR.setPower(0);
+        stopDrive(driveTrain);
 
         Shoulder.setPower(0);
         Elbow.setPower(0);
