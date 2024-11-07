@@ -10,8 +10,8 @@ import static org.firstinspires.ftc.teamcode.DriveUtilities.*;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Rotation;
 
-@Autonomous(name="Number One!")
-public class NumberOneAuton extends OpMode {
+@Autonomous(name="YellowBlocksBlue")
+public class YellowBlocksBlue extends OpMode {
     DcMotor[] driveTrain;
     DcMotor Hand, Elbow, Shoulder;
 

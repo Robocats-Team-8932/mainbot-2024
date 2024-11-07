@@ -6,7 +6,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Rotation;
+
+import java.util.function.Function;
 
 public class DriveUtilities {
     static double INCHES_2_TICKS = 118.83569;
@@ -16,18 +19,30 @@ public class DriveUtilities {
     static byte BACK_LEFT = 2;
     static byte BACK_RIGHT = 3;
 
+    static Telemetry telemetryInstance;
+    static Object[][] telemetryNextDataOnWait;
+
     public static void waitSeconds(float seconds) {
         ElapsedTime timer = new ElapsedTime(ElapsedTime.Resolution.SECONDS);
         timer.reset();
         while (timer.time() < seconds);
     }
     private static void _forInchesWait(DcMotor[] motors, int ticks) {
-        while (ticks != 0)
+        while (ticks != 0) {
             for (DcMotor motor : motors)
                 if (motor.getCurrentPosition() > ticks) {
                     ticks = 0;
                     break;
                 }
+            if (telemetryNextDataOnWait != null)
+                for (Object[] objects : telemetryNextDataOnWait)
+                    telemetryInstance.addData(
+                            (String)objects[0],
+                            objects[1]
+                    );
+            telemetryInstance.update();
+            telemetryNextDataOnWait = null;
+        }
 
         for (DcMotor motor : motors)
             motor.setPower(0);
@@ -57,6 +72,9 @@ public class DriveUtilities {
         _forInchesWait(motors, ticks);
     }
 
+    /**
+     * A positive value will send the robot right, a negative one will send it left
+     */
     public static void driveSideways(DcMotor[] motors, float speed) {
         motors[FRONT_LEFT].setPower(-speed);
         motors[BACK_LEFT].setPower(speed);
@@ -64,13 +82,8 @@ public class DriveUtilities {
         motors[BACK_RIGHT].setPower(-speed);
     }
 
-    public static void driveSidewaysForInches(DcMotor[] motors, float speed, float degrees) {
-        int ticks = (int)Math.floor(
-                INCHES_2_TICKS
-                        *
-                        ((16*Math.PI * (degrees/360))/2
-                )
-        );
+    public static void driveSidewaysForInches(DcMotor[] motors, float speed, float inches) {
+        int ticks = (int)Math.floor(INCHES_2_TICKS * inches);
         driveSideways(motors, ticks);
         _forInchesWait(motors, ticks);
     }
@@ -82,10 +95,8 @@ public class DriveUtilities {
         motors[BACK_RIGHT].setPower(-speed);
     }
 
-    public static void rotateForDegrees(DcMotor[] motors, float speed, float inches) {
-        int ticks = (int)Math.floor(
-                INCHES_2_TICKS * inches
-        );
+    public static void rotateForDegrees(DcMotor[] motors, float speed, float degrees) {
+        int ticks = (int) Math.floor(INCHES_2_TICKS * (16 * Math.PI * (degrees/360)));
         rotate(motors, speed);
         _forInchesWait(motors, ticks);
     }
@@ -125,5 +136,4 @@ public class DriveUtilities {
 
         return motors;
     }
-
 }
