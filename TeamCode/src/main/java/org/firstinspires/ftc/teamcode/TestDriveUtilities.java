@@ -1,17 +1,17 @@
 package org.firstinspires.ftc.teamcode;
 
 import static org.firstinspires.ftc.teamcode.DriveUtilities.*;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
-
 import org.firstinspires.ftc.robotcore.external.navigation.Rotation;
 
-@Autonomous(name="Yellow Blocks (Blue)")
-public class YellowBlocksBlue extends LinearOpMode {
-    static DcMotor[] driveTrain;
-    static DcMotor Hand, Elbow, Shoulder;
+@TeleOp(name="Test Drive Utilities")
+public class TestDriveUtilities extends LinearOpMode {
+    DcMotor Hand, Elbow, Shoulder;
+
+    DcMotor[] driveTrain;
 
     @Override
     public void runOpMode() {
@@ -19,7 +19,7 @@ public class YellowBlocksBlue extends LinearOpMode {
         driveTrain = initializeDriveTrain(hardwareMap);
 
         Hand = hardwareMap.get(DcMotor.class, "Intake");
-        Elbow  = hardwareMap.get(DcMotor.class, "Elbow");
+        Elbow = hardwareMap.get(DcMotor.class, "Elbow");
         Shoulder = hardwareMap.get(DcMotor.class, "Shoulder");
 
         MotorConfigurationType tetrixConfig = new MotorConfigurationType();
@@ -31,45 +31,28 @@ public class YellowBlocksBlue extends LinearOpMode {
         Elbow.setMotorType(tetrixConfig);
         Shoulder.setMotorType(tetrixConfig);
 
-        // FIXME: Keep note of this
-        resetEncoders(driveTrain);
-
-        DriveUtilities.telemetry = telemetry;
-
-        telemetry.addData("Status", "Initialized");
-        telemetry.update();
-
         waitForStart();
+        while (opModeIsActive()) {
+            if (gamepad1.a) {
+                driveForInches(driveTrain, .5f, 10f);
+                waitForMotorPositionReached();
+            }
 
-        // Do the auton thing!!@
+            if (gamepad1.b) {
+                driveSidewaysForInches(driveTrain, .25f, 10f);
+                waitForMotorPositionReached();
+            }
+            if (gamepad1.x) {
+                rotateForDegrees(driveTrain, .5f, 90f);
+                waitForMotorPositionReached();
+            }
+        }
 
-        // Get in position
-        telemetry.addData("Start Drive", true);
-        telemetry.update();
-        driveForInches(driveTrain, .4f, 10);
+        stopDrive(driveTrain);
 
-        telemetry.addData("Start Wait", true);
-        telemetry.update();
-        waitForMotorPositionReached();
-
-        telemetry.addData("Start Rotate", true);
-        telemetry.update();
-        rotateForDegrees(driveTrain, .4f, 20);
-        waitForMotorPositionReached();
-
-//        // Roll out arm
-//        powerForSeconds(Shoulder, .3f, .5f);
-//        powerForSeconds(Elbow, .3f, .4f);
-//
-//        // Run outtake
-//        powerForSeconds(Hand, 1, .2f);
-//
-//        // Pull arm back in
-//        powerForSeconds(Shoulder, -.3f, .5f);
-//        powerForSeconds(Elbow, -.3f, .4f);
-
-        // Stop!!!0
-        terminateOpModeNow();
+        Elbow.setPower(0);
+        Hand.setPower(0);
+        Shoulder.setPower(0);
     }
 
     public void waitForMotorPositionReached() {
@@ -81,7 +64,7 @@ public class YellowBlocksBlue extends LinearOpMode {
         ) {
             if (!opModeIsActive())
                 terminateOpModeNow();
-            telemetry.addData("Waiting", true);
+
         }
         resetMotorMode(driveTrain);
     }

@@ -34,16 +34,14 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
-
 import org.firstinspires.ftc.robotcore.external.navigation.Rotation;
-
 import java.util.Arrays;
 
 @TeleOp(name="Main2024")
 public class Main2024 extends OpMode {
     // Declare our motor variables
     DcMotor[] driveTrain;
-    DcMotor Hand, Elbow, Shoulder;
+    DcMotor Hand, Elbow, Shoulder, Climber;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -56,6 +54,7 @@ public class Main2024 extends OpMode {
         Hand = hardwareMap.get(DcMotor.class, "Intake");
         Elbow  = hardwareMap.get(DcMotor.class, "Elbow");
         Shoulder = hardwareMap.get(DcMotor.class, "Shoulder");
+        Climber = hardwareMap.get(DcMotor.class, "Climber");
 
         MotorConfigurationType tetrixConfig = new MotorConfigurationType();
         tetrixConfig.setGearing(52);
@@ -65,6 +64,10 @@ public class Main2024 extends OpMode {
 
         Elbow.setMotorType(tetrixConfig);
         Shoulder.setMotorType(tetrixConfig);
+        Shoulder.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        Elbow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        resetMotorMode(driveTrain);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -120,17 +123,25 @@ public class Main2024 extends OpMode {
         else
             Shoulder.setPower(0);
 
+        // FIXME: Hardcoded speed limiter
         if (Math.abs(ry2) > .1)
-            Elbow.setPower(ry2);
+            Elbow.setPower(.5 * ry2);
         else
             Elbow.setPower(0);
 
         if (Math.abs(gamepad2.left_trigger) > .2)
-            Hand.setPower(-.8);
+            Hand.setPower(-1);
         else if (Math.abs(gamepad2.right_trigger) > .2)
-            Hand.setPower(.8);
+            Hand.setPower(1);
         else
             Hand.setPower(0);
+
+        if (gamepad2.left_bumper)
+            Climber.setPower(-.7);
+        else if (gamepad2.right_bumper)
+            Climber.setPower(.7);
+        else
+            Climber.setPower(0);
 
         // Update dashboard values
         telemetry.addData("Encoders", Arrays.toString(new int[]{
